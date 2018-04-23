@@ -32,7 +32,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.TextView;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -55,13 +54,15 @@ public class MainActivity extends Activity {
     private CompoundButton useFlash;
 
     private Button readBarcode;
+    private Button sendEmail;
+    private Button addPhoto;
 
     private static final String TAG = "BarcodeMain";
-
     private static final int REQUEST_BARCODE_CAPTURE = 9001;
+
     private static final int REQUEST_IMAGE_CAPTURE = 9002;
     private static final int REQUEST_HANDLE_CAMERA_PERM = 9003;
-
+    private String barcodeValue = null;
     private Uri photoURI = null;
 
     private File createImageFile() throws IOException {
@@ -80,7 +81,7 @@ public class MainActivity extends Activity {
         return image;
     }
 
-    private void dispatchTakePicture() {
+    private void dispatchAddPhoto() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -154,21 +155,30 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         readBarcode = (Button) findViewById(R.id.read_barcode);
+        sendEmail = (Button) findViewById(R.id.send_email);
+        addPhoto = (Button) findViewById(R.id.add_photo);
 
         autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
         useFlash = (CompoundButton) findViewById(R.id.use_flash);
 
-        findViewById(R.id.send_email).setOnClickListener(new View.OnClickListener() {
+        sendEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dispatchSendEmail();
             }
         });
 
-        findViewById(R.id.read_barcode).setOnClickListener(new View.OnClickListener() {
+        readBarcode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dispatchReadBarcode();
+            }
+        });
+
+        addPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dispatchAddPhoto();
             }
         });
     }
@@ -211,7 +221,7 @@ public class MainActivity extends Activity {
                     Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
                     readBarcode.setText(barcode.displayValue);
                     Log.d(TAG, "Barcode read: " + barcode.displayValue);
-                    dispatchTakePicture();
+                    dispatchAddPhoto();
                 } else {
                     readBarcode.setText(R.string.barcode_failure);
                     Log.d(TAG, "No barcode captured, intent data is null");
