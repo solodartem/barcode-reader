@@ -9,33 +9,42 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.google.android.gms.samples.vision.barcodereader.MainActivity">
 
-    <TextView
-        android:id="@+id/status_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/barcode_header"
-        android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
-        android:id="@+id/barcode_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/status_message"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/status_message"
-        android:layout_marginTop="110dp"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
     <Button
         android:id="@+id/read_barcode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/read_barcode" />
+
+    <CheckBox
+        android:id="@+id/auto_focus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/barcode_value"
+        android:layout_marginTop="66dp"
+        android:checked="false"
+        android:text="@string/auto_focus" />
+
+    <CheckBox
+        android:id="@+id/use_flash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/auto_focus"
+        android:checked="false"
+        android:text="@string/use_flash" />
+
+    <Button
+        android:id="@+id/add_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:text="@string/read_barcode" />
+        android:text="@string/add_photo" />
 
     <Button
         android:id="@+id/send_email"
@@ -44,24 +53,5 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:text="@string/send_email" />
-
-    <Switch
-        android:id="@+id/auto_focus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/read_barcode"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="20dp"
-        android:checked="false"
-        android:text="@string/auto_focus" />
-
-    <Switch
-        android:id="@+id/use_flash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/barcode_value"
-        android:layout_alignTop="@+id/auto_focus"
-        android:checked="false"
-        android:text="@string/use_flash" />
 
 </RelativeLayout>

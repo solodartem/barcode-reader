@@ -6,8 +6,9 @@
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="title_activity_main">Barcode Reader Sample</string>
     <string name="barcode_header">Штрихкод не отканирован</string>
-    <string name="read_barcode">Сброс + сканировать штрихккод</string>
+    <string name="read_barcode">Сканировать</string>
     <string name="send_email">Выслать</string>
+    <string name="add_photo">+Фото</string>
     <string name="auto_focus">Автофокус</string>
     <string name="use_flash">Использовать вспышку</string>
     <string name="barcode_success">Barcode read successfully</string>
