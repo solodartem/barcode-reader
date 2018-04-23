@@ -21,13 +21,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
@@ -49,7 +47,7 @@ import java.util.Stack;
  * Main activity demonstrating how to pass extra parameters to an activity that
  * reads barcodes.
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity {
 
     // use a compound button so either checkbox or switch widgets work.
     private CompoundButton autoFocus;
@@ -57,10 +55,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private TextView statusMessage;
     private TextView barcodeValue;
 
-    private static final int RC_BARCODE_CAPTURE = 9001;
     private static final String TAG = "BarcodeMain";
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int RC_HANDLE_CAMERA_PERM = 2;
+
+    private static final int REQUEST_BARCODE_CAPTURE = 9001;
+    private static final int REQUEST_IMAGE_CAPTURE = 9002;
+    private static final int REQUEST_HANDLE_CAMERA_PERM = 9003;
+
     private Uri photoURI = null;
 
     private File createImageFile() throws IOException {
@@ -79,7 +79,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return image;
     }
 
-    private void dispatchTakePictureIntent() {
+    private void dispatchTakePicture() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -92,9 +92,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                photoURI = FileProvider.getUriForFile(this,
-                        "com.example.android.fileprovider",
-                        photoFile);
+                photoURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
                 if (rc != PackageManager.PERMISSION_GRANTED) {
@@ -105,8 +103,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    public Intent createEmailOnlyChooserIntent(Intent source,
-                                               CharSequence chooserTitle) {
+    public Intent createEmailOnlyChooserIntent(Intent source, CharSequence chooserTitle) {
         Stack<Intent> intents = new Stack<Intent>();
         Intent i = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto",
                 "info@domain.com", null));
@@ -120,18 +117,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
         if (!intents.isEmpty()) {
-            Intent chooserIntent = Intent.createChooser(intents.remove(0),
-                    chooserTitle);
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
-                    intents.toArray(new Parcelable[intents.size()]));
-
+            Intent chooserIntent = Intent.createChooser(intents.remove(0), chooserTitle);
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intents.toArray(new Parcelable[intents.size()]));
             return chooserIntent;
         } else {
             return Intent.createChooser(source, chooserTitle);
         }
     }
 
-    private  void dispatchSendEmail() {
+    private void dispatchSendEmail() {
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("*/*");
         i.putExtra(Intent.EXTRA_EMAIL, new String[]{"solod_a@ukr.net"});
@@ -146,21 +140,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         final String[] permissions = new String[]{Manifest.permission.CAMERA};
 
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
+        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_HANDLE_CAMERA_PERM);
             return;
         }
 
-        final Activity thisActivity = this;
-
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ActivityCompat.requestPermissions(thisActivity, permissions,
-                        RC_HANDLE_CAMERA_PERM);
-            }
-        };
     }
 
     @Override
@@ -174,34 +158,27 @@ public class MainActivity extends Activity implements View.OnClickListener {
         autoFocus = (CompoundButton) findViewById(R.id.auto_focus);
         useFlash = (CompoundButton) findViewById(R.id.use_flash);
 
-        findViewById(R.id.read_barcode).setOnClickListener(this);
-
         findViewById(R.id.send_email).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dispatchTakePictureIntent();
+                dispatchSendEmail();
             }
+        });
 
-
+        findViewById(R.id.read_barcode).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dispatchReadBarcode();
+            }
         });
     }
 
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.read_barcode) {
-            // launch barcode activity.
-            Intent intent = new Intent(this, BarcodeCaptureActivity.class);
-            intent.putExtra(BarcodeCaptureActivity.AutoFocus, autoFocus.isChecked());
-            intent.putExtra(BarcodeCaptureActivity.UseFlash, useFlash.isChecked());
-
-            startActivityForResult(intent, RC_BARCODE_CAPTURE);
-        }
-
+    public void dispatchReadBarcode() {
+        // launch barcode activity.
+        Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+        intent.putExtra(BarcodeCaptureActivity.AutoFocus, autoFocus.isChecked());
+        intent.putExtra(BarcodeCaptureActivity.UseFlash, useFlash.isChecked());
+        startActivityForResult(intent, REQUEST_BARCODE_CAPTURE);
     }
 
     /**
@@ -228,31 +205,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RC_BARCODE_CAPTURE) {
+        if (requestCode == REQUEST_BARCODE_CAPTURE) {
             if (resultCode == CommonStatusCodes.SUCCESS) {
                 if (data != null) {
                     Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
                     statusMessage.setText(R.string.barcode_success);
                     barcodeValue.setText(barcode.displayValue);
                     Log.d(TAG, "Barcode read: " + barcode.displayValue);
+                    dispatchTakePicture();
                 } else {
                     statusMessage.setText(R.string.barcode_failure);
                     Log.d(TAG, "No barcode captured, intent data is null");
                 }
             } else {
-                statusMessage.setText(String.format(getString(R.string.barcode_error),
-                        CommonStatusCodes.getStatusCodeString(resultCode)));
+                statusMessage.setText(String.format(getString(R.string.barcode_error), CommonStatusCodes.getStatusCodeString(resultCode)));
             }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            dispatchSendEmail();
         } else {
             super.onActivityResult(requestCode, resultCode, data);
-        }
-
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            System.out.println(photoURI);
-//            Bitmap imageBitmap = (Bitmap) extras.get("data");
-          //  mImageView.setImageBitmap(imageBitmap);
-            dispatchSendEmail();
         }
     }
 }
