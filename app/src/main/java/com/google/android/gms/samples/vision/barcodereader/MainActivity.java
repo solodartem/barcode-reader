@@ -29,6 +29,8 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -66,6 +68,14 @@ public class MainActivity extends Activity {
     private String barcodeValue = null;
     private ArrayList<Uri> photos = new ArrayList<>();
     private Uri photoURI = null;
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
 
     private File createImageFile() throws IOException {
         // Create an image file name
