@@ -39,6 +39,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Stack;
@@ -63,6 +64,7 @@ public class MainActivity extends Activity {
     private static final int REQUEST_IMAGE_CAPTURE = 9002;
     private static final int REQUEST_HANDLE_CAMERA_PERM = 9003;
     private String barcodeValue = null;
+    private ArrayList<Uri> photos = new ArrayList<>();
     private Uri photoURI = null;
 
     private File createImageFile() throws IOException {
@@ -128,13 +130,19 @@ public class MainActivity extends Activity {
     }
 
     private void dispatchSendEmail() {
-        Intent i = new Intent(Intent.ACTION_SEND);
-        i.setType("*/*");
-        i.putExtra(Intent.EXTRA_EMAIL, new String[]{"solod_a@ukr.net"});
-        i.putExtra(Intent.EXTRA_SUBJECT, "Crash report");
-        i.putExtra(Intent.EXTRA_TEXT, "Some crash report details");
-        i.putExtra(Intent.EXTRA_STREAM, photoURI);
-        startActivity(createEmailOnlyChooserIntent(i, "Send via email"));
+        //need to "send multiple" to get more than one attachment
+        final Intent emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{"Admin@isc.net.ua"});
+/*
+        emailIntent.putExtra(android.content.Intent.EXTRA_CC,new String[]{emailCC});
+*/
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, barcodeValue);
+/*
+        emailIntent.putExtra(Intent.EXTRA_TEXT, emailText);
+*/
+        emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, photos);
+        startActivity(Intent.createChooser(emailIntent, "Send mail..."));
     }
 
     private void requestCameraPermission() {
@@ -184,11 +192,17 @@ public class MainActivity extends Activity {
     }
 
     public void dispatchReadBarcode() {
+        release();
         // launch barcode activity.
         Intent intent = new Intent(this, BarcodeCaptureActivity.class);
         intent.putExtra(BarcodeCaptureActivity.AutoFocus, autoFocus.isChecked());
         intent.putExtra(BarcodeCaptureActivity.UseFlash, useFlash.isChecked());
         startActivityForResult(intent, REQUEST_BARCODE_CAPTURE);
+    }
+
+    private void release() {
+        photos.clear();
+        readBarcode.setText("");
     }
 
     /**
@@ -230,7 +244,8 @@ public class MainActivity extends Activity {
                 readBarcode.setText(String.format(getString(R.string.barcode_error), CommonStatusCodes.getStatusCodeString(resultCode)));
             }
         } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            dispatchSendEmail();
+            photos.add(photoURI);
+            //dispatchSendEmail();
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
