@@ -19,18 +19,21 @@ package com.google.android.gms.samples.vision.barcodereader;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -65,7 +68,6 @@ public class MainActivity extends Activity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 9002;
     private static final int REQUEST_HANDLE_CAMERA_PERM = 9003;
-    private String barcodeValue = null;
     private ArrayList<Uri> photos = new ArrayList<>();
     private Uri photoURI = null;
 
@@ -139,15 +141,30 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+        }
+        return false;
+    }
+
     private void dispatchSendEmail() {
         //need to "send multiple" to get more than one attachment
         final Intent emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         emailIntent.setType("text/plain");
-        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{"Admin@isc.net.ua"});
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String sendToEmail = sharedPref.getString("SEND_TO_EMAIL", "");
+        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{sendToEmail});
 /*
         emailIntent.putExtra(android.content.Intent.EXTRA_CC,new String[]{emailCC});
 */
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, barcodeValue);
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, readBarcode.getText());
 /*
         emailIntent.putExtra(Intent.EXTRA_TEXT, emailText);
 */
@@ -171,6 +188,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //setHasOptionsMenu(true);
 
         readBarcode = (Button) findViewById(R.id.read_barcode);
         sendEmail = (Button) findViewById(R.id.send_email);

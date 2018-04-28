@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
-        android:key="pref_sync"
+        android:key="SEND_TO_EMAIL"
         android:title="@string/target_email_settings_title"
         android:defaultValue="@string/target_email_default_value" />
 
